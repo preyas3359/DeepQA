@@ -369,26 +369,27 @@ class Chatbot:
 		df = pd.read_csv('AptData.csv')
 		df['minPrice'] = df['minPrice'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
 		df['maxPrice'] = df['maxPrice'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
-
+		df['location'] = df['location'].str.lower()
 		print('I will be Happy to assist you in finding an Apartment')
 
 		print('What type of apartment are you looking for? Options: Studio, 1bedroom , 2bedroom, 3bedroom, 4bedroom and 5bedroom. Please enter 1 option')
 		question = input(self.SENTENCES_PREFIX[0]).split()
-		# if len(question) == 1:
-		# 	df = df[df[question[0]].str.contains('yes')]
-		# elif len(question) == 2:
-		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes')]
-		# elif len(question) == 3:
-		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes')]
-		# elif len(question) == 4:
-		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes') || df[question[3]].str.contains('yes')]
-		# elif len(question) == 5:
-		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes') || df[question[3]].str.contains('yes') || df[question[4]].str.contains('yes')]
+		if len(question) == 1:
+			df = df[(df[question[0]].str.contains('yes'))]
+		elif len(question) == 2:
+			df = df[(df[question[0]].str.contains('yes')) |  (df[question[1]].str.contains('yes'))]#df[(df[type2[1]].str.contains('yes')) | df[type2[2]].str.contains('yes')]
+		elif len(question) == 3:
+			df = df[(df[question[0]].str.contains('yes')) |  (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes'))]
+		elif len(question) == 4:
+			df = df[(df[question[0]].str.contains('yes')) | (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes')) | (df[question[3]].str.contains('yes'))]
+		elif len(question) == 5:
+			df = df[(df[question[0]].str.contains('yes')) |  (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes')) | (df[question[3]].str.contains('yes')) | (df[question[4]].str.contains('yes'))]
 		
-		df = df[df[question[0]].str.contains('yes')] #Have not implemented the multiple types yet, this should be done soon
+		print(df)
+		#df = df[df[question[0]].str.contains('yes')] #Have not implemented the multiple types yet, this should be done soon
 		print('How do you want to search your apartment, location based or rent based?')
 		
-		question = input(self.SENTENCES_PREFIX[0])
+		question = input(self.SENTENCES_PREFIX[0]).lower()
 		#if question == '' or question == 'exit':
 		#	break
 		# search_criteria = []
@@ -400,7 +401,7 @@ class Chatbot:
 
 		#Currently, adding search by location only, can add search by type and price later on.
 		#if len(search_criteria == 1):
-		if 'localion' in question:
+		if 'location' in question:
 			self.locationBased(df) #Call the location based search function
 		elif 'rent' in question:
 			self.rentBased(df)
@@ -420,8 +421,8 @@ class Chatbot:
 		 # Creating the dataFrame
 		print('Please enter the name of the street you want me to search for')
 		while True:
-			question = input(self.SENTENCES_PREFIX[0])
-			if len(questions.split()) != 1:
+			question = input(self.SENTENCES_PREFIX[0]).lower()
+			if len(question.split()) != 1:
 				print ('Please enter one word only')
 				continue
 			new_df = df[df['location'].str.contains(question)] # Search based on location
@@ -442,7 +443,7 @@ class Chatbot:
 	def rentBased(self, df):
 		#Write the rent based search algorithm
 		print('Please enter the price range seperated by space')
-		question = input(self.SENTENCES_PREFIX[0]).split()
+		question = input(self.SENTENCES_PREFIX[0]).lower().split()
 		new_df = df[(df['minPrice'] <= float(question[0])) & (df['maxPrice'] >= float(question[1]))]
 		print(' I found {} apartments.'.format(len(new_df)))
 		for i in range(len(new_df)):

@@ -372,7 +372,7 @@ class Chatbot:
 		df['location'] = df['location'].str.lower()
 		print('I will be Happy to assist you in finding an Apartment')
 
-		print('What type of apartment are you looking for? Options: Studio, 1bedroom , 2bedroom, 3bedroom, 4bedroom and 5bedroom. Please enter 1 option')
+		print('What type of apartment are you looking for? Options: Studio, 1bedroom , 2bedroom, 3bedroom, 4bedroom and 5bedroom. You can choose multiple options separated by space')
 		question = input(self.SENTENCES_PREFIX[0]).split()
 		if len(question) == 1:
 			df = df[(df[question[0]].str.contains('yes'))]
@@ -419,7 +419,7 @@ class Chatbot:
 	def locationBased(self, df):
 		#Currently, search only based on location - Will add other optins later on.
 		 # Creating the dataFrame
-		print('Please enter the name of the street you want me to search for')
+		print('Please enter the names of the streets you want me to search for separated by space.')
 		inLoop = True
 		while inLoop:
 			question = input(self.SENTENCES_PREFIX[0]).lower()

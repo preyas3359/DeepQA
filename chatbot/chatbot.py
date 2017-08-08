@@ -364,38 +364,95 @@ class Chatbot:
 		 Function to merge the AI bot with the rent bot
 		
 		"""
-		key_words = ['locality', 'rent', 'type', 'based']
+		key_words = ['location', 'rent', 'type']
+		#returnToPrevFunc = True
+		df = pd.read_csv('AptData.csv')
+		df['minPrice'] = df['minPrice'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
+		df['maxPrice'] = df['maxPrice'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
+
 		print('I will be Happy to assist you in finding an Apartment')
-		print('How do you want to search your apartment, locality wise? Rent based? or Type of apartment?')
+
+		print('What type of apartment are you looking for? Options: Studio, 1bedroom , 2bedroom, 3bedroom, 4bedroom and 5bedroom. Please enter 1 option')
+		question = input(self.SENTENCES_PREFIX[0]).split()
+		# if len(question) == 1:
+		# 	df = df[df[question[0]].str.contains('yes')]
+		# elif len(question) == 2:
+		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes')]
+		# elif len(question) == 3:
+		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes')]
+		# elif len(question) == 4:
+		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes') || df[question[3]].str.contains('yes')]
+		# elif len(question) == 5:
+		# 	df = df[df[question[0]].str.contains('yes') ||  df[question[1]].str.contains('yes') || df[question[2]].str.contains('yes') || df[question[3]].str.contains('yes') || df[question[4]].str.contains('yes')]
+		
+		df = df[df[question[0]].str.contains('yes')] #Have not implemented the multiple types yet, this should be done soon
+		print('How do you want to search your apartment, location based or rent based?')
+		
 		question = input(self.SENTENCES_PREFIX[0])
 		#if question == '' or question == 'exit':
 		#	break
-		search_criteria = []
-		for word in question.split():# Add other delimiters too - Rishabh
-			if word.lower() in key_words:
-				search_criteria.append(word);
-		#Currently, adding search by location only, can add search by type and price later on.
-		if 'locality' in search_criteria:
-			print('Please enter the street on which you want to search')
+		# search_criteria = []
+		# for word in question.split():# Add other delimiters too - Rishabh
+		# 	if word.lower() in key_words:
+		# 		search_criteria.append(word);
 		
+		
+
+		#Currently, adding search by location only, can add search by type and price later on.
+		#if len(search_criteria == 1):
+		if 'localion' in question:
+			self.locationBased(df) #Call the location based search function
+		elif 'rent' in question:
+			self.rentBased(df)
+		else:
+			print('Wrong input, please enter again')
+		#elif len(search_criteria == 2)
+			#self.mutipleCriteria(df)
 		#Add an else statement
-		question = input(self.SENTENCES_PREFIX[0])
-		self.rentInfo(search_criteria,question)
+		#question = input(self.SENTENCES_PREFIX[0])
+		#self.rentInfo(search_criteria,question)
 
 				
 
 	#By Rishabh
-	def rentInfo(self,search_criteria,question):
+	def locationBased(self, df):
 		#Currently, search only based on location - Will add other optins later on.
-		df = pd.read_csv('apartments.csv') # Creating the dataFrame
-		new_df = df[df['location'].str.contains(question)] # Search based on location
-		new_df = new_df.reset_index(drop=True) # Re-indexing
+		 # Creating the dataFrame
+		print('Please enter the name of the street you want me to search for')
+		while True:
+			question = input(self.SENTENCES_PREFIX[0])
+			if len(questions.split()) != 1:
+				print ('Please enter one word only')
+				continue
+			new_df = df[df['location'].str.contains(question)] # Search based on location
+			new_df = new_df.reset_index(drop=True) # Re-indexing
 		#The print commands
-		print('On {}, I found {} apartments.'.format(question,len(new_df))) 
+			print('On {}, I found {} apartments.'.format(question,len(new_df))) 
+			for i in range(len(new_df)):
+				print('{} located at {} has units in the price range of {} to {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice']))
+			break
+			#print('Would you like to narrow down the search based on another parameter?\n If yes, please choose from rent or type. If no, please type exit')
+			#question = input(self.SENTENCES_PREFIX[0])
+			#if 
+
+
+
+
+
+	def rentBased(self, df):
+		#Write the rent based search algorithm
+		print('Please enter the price range seperated by space')
+		question = input(self.SENTENCES_PREFIX[0]).split()
+		new_df = df[(df['minPrice'] <= float(question[0])) & (df['maxPrice'] >= float(question[1]))]
+		print(' I found {} apartments.'.format(len(new_df)))
 		for i in range(len(new_df)):
-			print('{} located at {}, has {} in the price range of {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['type'],new_df.iloc[i]['price']))
+			print('{} located at {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location']))
 
+	#def typeBased(seld, df):
+		#Write the type based search algorithm
 
+	#def multipleCriteria(seld, df):
+		#Write the multiple criterial based search algorithm 
 	def singlePredict(self, question, questionSeq=None):
 		""" Predict the sentence
 		Args:

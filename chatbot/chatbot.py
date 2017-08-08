@@ -385,7 +385,7 @@ class Chatbot:
 		elif len(question) == 5:
 			df = df[(df[question[0]].str.contains('yes')) |  (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes')) | (df[question[3]].str.contains('yes')) | (df[question[4]].str.contains('yes'))]
 		
-		print(df)
+		#print(df)
 		#df = df[df[question[0]].str.contains('yes')] #Have not implemented the multiple types yet, this should be done soon
 		print('How do you want to search your apartment, location based or rent based?')
 		
@@ -420,18 +420,19 @@ class Chatbot:
 		#Currently, search only based on location - Will add other optins later on.
 		 # Creating the dataFrame
 		print('Please enter the name of the street you want me to search for')
-		while True:
+		inLoop = True
+		while inLoop:
 			question = input(self.SENTENCES_PREFIX[0]).lower()
-			if len(question.split()) != 1:
-				print ('Please enter one word only')
-				continue
-			new_df = df[df['location'].str.contains(question)] # Search based on location
-			new_df = new_df.reset_index(drop=True) # Re-indexing
-		#The print commands
-			print('On {}, I found {} apartments.'.format(question,len(new_df))) 
-			for i in range(len(new_df)):
-				print('{} located at {} has units in the price range of {} to {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice']))
-			break
+			streets = question.split()
+			for street in streets:
+				new_df = df[df['location'].str.contains(street)] # Search based on location
+				new_df = new_df.reset_index(drop=True) # Re-indexing
+			#The print commands
+				print('On {}, I found {} apartments.'.format(street,len(new_df))) 
+				for i in range(len(new_df)):
+					inLoop = False
+					print('{} located at {} has units in the price range of {} to {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice']))
+				
 			#print('Would you like to narrow down the search based on another parameter?\n If yes, please choose from rent or type. If no, please type exit')
 			#question = input(self.SENTENCES_PREFIX[0])
 			#if 

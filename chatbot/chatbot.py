@@ -321,13 +321,15 @@ class Chatbot:
 		# TODO: Also show the top 10 most likely predictions for each predicted output (when verbose mode)
 		# TODO: Log the questions asked for latter re-use (merge with test/samples.txt)
 		#Edited by Rishabh for the RentBot application
-		trigger_words = ['apartment', 'place', 'house'] #We can add more trigger words, if need be. 
+		trigger_words = ['apartment', 'apartments', 'place', 'places', 'house', 'houses', 'condo', 'condos', 'rent'] #We can add more trigger words, if need be.
 
 		print('Testing: Launch interactive mode:')
 		print('')
 		print('Welcome to the interactive mode, here you can ask to Deep Q&A the sentence you want. Don\'t have high '
 			  'expectation. Type \'exit\' or just press ENTER to quit the program. Have fun.')
-		print('Hi, I am RentApt. I will be helping you to search for apartemnts today! May I know whom I am talking to?')
+        #name = input("Hi, I am RentApt. I will be helping you to search for apartemnts today! May I know whom I am talking to?:")
+		name = input("Hi, I am RentApt. I will be helping you to search for apartemnts today! May I know whom I am talking to?:")
+		print('Howdy %s, how may I help you today' % name)
 
 		call_function_flag = False
 		while True:
@@ -362,7 +364,7 @@ class Chatbot:
 		"""
 
 		 Function to merge the AI bot with the rent bot
-		
+
 		"""
 		key_words = ['location', 'rent', 'type']
 		#returnToPrevFunc = True
@@ -374,6 +376,7 @@ class Chatbot:
 
 		print('What type of apartment are you looking for? Options: Studio, 1bedroom , 2bedroom, 3bedroom, 4bedroom and 5bedroom. You can choose multiple options separated by space')
 		question = input(self.SENTENCES_PREFIX[0]).split()
+		print(len(question))
 		if len(question) == 1:
 			df = df[(df[question[0]].str.contains('yes'))]
 		elif len(question) == 2:
@@ -384,11 +387,11 @@ class Chatbot:
 			df = df[(df[question[0]].str.contains('yes')) | (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes')) | (df[question[3]].str.contains('yes'))]
 		elif len(question) == 5:
 			df = df[(df[question[0]].str.contains('yes')) |  (df[question[1]].str.contains('yes')) | (df[question[2]].str.contains('yes')) | (df[question[3]].str.contains('yes')) | (df[question[4]].str.contains('yes'))]
-		
+
 		#print(df)
 		#df = df[df[question[0]].str.contains('yes')] #Have not implemented the multiple types yet, this should be done soon
-		print('How do you want to search your apartment, location based or rent based?')
-		
+		print('How do you want to search your apartment, name based, location based or rent based?')
+
 		question = input(self.SENTENCES_PREFIX[0]).lower()
 		#if question == '' or question == 'exit':
 		#	break
@@ -396,8 +399,8 @@ class Chatbot:
 		# for word in question.split():# Add other delimiters too - Rishabh
 		# 	if word.lower() in key_words:
 		# 		search_criteria.append(word);
-		
-		
+
+
 
 		#Currently, adding search by location only, can add search by type and price later on.
 		#if len(search_criteria == 1):
@@ -405,6 +408,8 @@ class Chatbot:
 			self.locationBased(df) #Call the location based search function
 		elif 'rent' in question:
 			self.rentBased(df)
+		elif 'name' in question:
+			self.nameBased(df)
 		else:
 			print('Wrong input, please enter again')
 		#elif len(search_criteria == 2)
@@ -413,7 +418,7 @@ class Chatbot:
 		#question = input(self.SENTENCES_PREFIX[0])
 		#self.rentInfo(search_criteria,question)
 
-				
+
 
 	#By Rishabh
 	def locationBased(self, df):
@@ -428,16 +433,32 @@ class Chatbot:
 				new_df = df[df['location'].str.contains(street)] # Search based on location
 				new_df = new_df.reset_index(drop=True) # Re-indexing
 			#The print commands
-				print('On {}, I found {} apartments.'.format(street,len(new_df))) 
+				print('On {}, I found {} apartments.'.format(street,len(new_df)))
 				for i in range(len(new_df)):
 					inLoop = False
-					print('{} located at {} has units in the price range of {} to {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice']))
-				
+					print('{} located at {} has units in the price range of {} to {}, more info is available @ {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice'],new_df.iloc[i]['website']))
+
 			#print('Would you like to narrow down the search based on another parameter?\n If yes, please choose from rent or type. If no, please type exit')
 			#question = input(self.SENTENCES_PREFIX[0])
-			#if 
+			#if
 
 
+	def nameBased(self, df):
+		#Currently, search only based on location - Will add other optins later on.
+		 # Creating the dataFrame
+		print('Please enter the names of the apartments you want me to search for separated by space.')
+		inLoop = True
+		while inLoop:
+			question = input(self.SENTENCES_PREFIX[0]).lower()
+			streets = question.split()
+			for street in streets:
+				new_df = df[df['name'].str.contains(street)] # Search based on location
+				new_df = new_df.reset_index(drop=True) # Re-indexing
+			#The print commands
+				print('On {}, I found {} apartments.'.format(street,len(new_df)))
+				for i in range(len(new_df)):
+					inLoop = False
+					print('{} located at {} has units in the price range of {} to {}, more info is available @ {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice'],new_df.iloc[i]['website']))
 
 
 
@@ -448,13 +469,13 @@ class Chatbot:
 		new_df = df[(df['minPrice'] <= float(question[0])) & (df['maxPrice'] >= float(question[1]))]
 		print(' I found {} apartments.'.format(len(new_df)))
 		for i in range(len(new_df)):
-			print('{} located at {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location']))
+			print('{} located at {} has units in the price range of {} to {}, more info is available @ {}'.format(new_df.iloc[i]['name'],new_df.iloc[i]['location'],new_df.iloc[i]['minPrice'],new_df.iloc[i]['maxPrice'],new_df.iloc[i]['website']))
 
 	#def typeBased(seld, df):
 		#Write the type based search algorithm
 
 	#def multipleCriteria(seld, df):
-		#Write the multiple criterial based search algorithm 
+		#Write the multiple criterial based search algorithm
 	def singlePredict(self, question, questionSeq=None):
 		""" Predict the sentence
 		Args:
